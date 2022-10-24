@@ -1,0 +1,21 @@
+1.  场景
+public class MyClass{
+    public void MyMethod(){
+        int count = 0;
+        byte[] buffer = new byte[100]; 
+注:     1.  当有 new 这个 keyword, a new object gets created and allocated on the heap
+        2.  反之, 可能需要一个 delete keyword 去移除这个。 但是很多语言都不加这个, 
+            而是引用 garbage collection, 很容易出现以下 - 详见 2. 内容几个错误
+    }
+}
+
+2.  内存几个错误
+(1) 因为如果创建一个object, 而忘了删除它 - 会导致 memory leak
+(2) 如果在object 已经被delete, 还去使用这个 object - 会导致 memory corruption
+(3) 删除一个已经没有分配内存空间的object - 会导致 memory error
+总结:   所以基于以上情况, 微软还需要一个 garbage collection
+
+3.  garbage collection 的缺点
+(1) 太便利, 因为全都是自动的 
+(2) developers lose sight of memory footprint
+(3) code 可以使用, 但是会导致 allocated much more memory that it actually needs

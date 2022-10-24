@@ -1,0 +1,39 @@
+一. 介绍
+1.  stack 储存什么
+(1) calling methods 
+(2) local variables
+
+2.  stack call method 的流程
+(1) 会先创建一个 stack frame 去包含这个 method, 内容如下:
+    a.  local variables
+    b.  return value 的 address
+    c.  method parameters
+
+(2) 当这个 method 又call 另一个 method 时, 会创建第二个 stack frame 在 第一个的上面 (先进后出 - first in last out)
+    a.  同样会保存 return value 的 address, method parameters, local variables     
+    b.  很快, 当被 call 的第二 method 跑完了, 这个第二个stack frame 里的所有内容就会被 removed, 特别是 第二个method 的 local variable
+    c.  当 第一个method 跑完了, 你的第一个stack frame 就 remove. 你的所有local variables 都会被 destroyed 
+    注: b 和 c 就很好解释了 先进后出 - first in last out
+
+(3) (不常见) 如果 method call 另一个method, 而且这个method 又call 别的method, 如此循环, 就会出现太多 stack frame 被创建 
+    - 就会出现 Stack Overflow Exception - 原因 infinite sequence of method calls 
+    注: 是 method 被调用了 但是没被释放, 所以应该是 method inside method, 然后 method 再 inside method
+
+3.  总结重点
+(1) 当 一个method call 另一个method, 后来被call的method 会在上面 - 先进后出 (first in last out) 的原则 - 详见 2.7 stack_memory.PNG
+(2) ！！！当一个method 执行完成后, 这个method 的 local variables 都会变成 go out of scope 而且都会被 destroyed (就是 garbage collection 的回收了)
+(3) (不常见) Stack Overflow Exception - 原因 infinite sequence of method calls - 
+    就是 method call 另一个method, 而且这个method 又call 别的method, 如此循环, 就会出现太多 stack frame 被创建
+
+4.  代码展示 Stack Overflow Exception
+public class MainClass{
+    private static void DrawLine(int line){
+        DrawSquare(line); // 这是属于递归, 但是会无限call 自己, 所以就会创建很多 stack frame 则导致  StackOverflowException
+    }
+    private static void DrawSquare(int x){
+        DrawLine(x);
+    }
+    public static void Main(string[] args){
+        DrawSquare(1);
+    }
+}
