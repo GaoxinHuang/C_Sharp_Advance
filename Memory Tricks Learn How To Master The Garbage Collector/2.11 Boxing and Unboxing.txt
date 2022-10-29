@@ -1,0 +1,33 @@
+一. 代码例子
+public class MainClass{
+    public static void Main(string[] args){
+        int a = 123;
+        object b = a; // boxing
+        int c = (int) b; // unboxing
+        Console.WriteLine(c);
+    }
+}
+
+二. 解释代码
+1.  int a = 123; // stack 会存  int a = 123
+2.  object b = a; // boxing - 详见 2.11 Boxing.PNG
+注: (1) stack 存 int a = 123, object o 的 reference address
+    (2) heap 同样会存 123 的值, object o 的reference 也会指向 1234
+    (3) 以上这个情况 就是 boxing
+
+3.  int c = (int) b; // unboxing - 详见 2.11 Unboxing.PNG
+注: (1) stack 会创建一个 int c = 123 (123 就是从 heap 里获取到的)
+    (2) heap 的 123 依旧存在
+    (3) 以上这个情况 就是 unboxing
+
+三. boxing 和 unboxing 的意义 - 
+1.  can link between value-types and reference-types by allowing any value of a value-type to be converted to and from type object
+    简单的说就是 value type 和 object type 能互相强转 
+    (1) boxing 允许你 reference type 转 value type
+    (2) unboxing 允许你 value type 转 reference type
+
+2.  同时又保证了拥有 unified type system (统一类型的系统) - 面试时可以不说这个
+
+四. 总结:
+1.  Boxing - 就是 当 cast/convert object value to value type  
+1.  Unboxing - 就是 当 cast/convert value type to object type  
