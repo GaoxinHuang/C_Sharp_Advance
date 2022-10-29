@@ -1,0 +1,49 @@
+1.  概念
+(1) Object always go to heap
+
+2.  代码
+public class Line{
+    ....
+}
+public class MainClass{
+    private static void DrawPolygon(Line[] lines){
+        .....    
+    }
+    private static void DrawSquare(int x){
+        Line[] lines = new Line[2];
+        lines[0] = new Line(x, y);
+        lines[1] = new Line(m, k);
+        DrawPolygon(lines);
+    }
+    public static void Main(string[] args){
+        DrawSquare(1);
+    }
+}
+
+3.  内存的流程展示 - 一个 method (称 method A) call 另一个method (称 method B) 带 object 参数时 
+(1) stack 部分还是原来样子: 两个 stack frame (新创一个 stack frame), 包含 local varibale, return address, parameter
+(2) 而 因为我们 new 了一个 object, 所以new 的 lines 将会存在 heap 里, 而且 heap 里 有个 line[] array, 里面有 2个值 line, 
+    这两个 line 又会分别指向 heap里的 Line object (注: Line[] array 所有东西都在 heap)
+
+(3) stack 只保存这个 lines 的 reference 
+
+(4) 当 整个 method B 执行完毕后, 会发现以下的变化:
+a.  stack 的部分 - 被call method B的 stack frame 都会被 destroy 掉. 
+b.  ！！！但是 因为 lines 是被 new的 object, 而且有 reference 值在 stack 里, 
+    所以 heap 的部分还会被保持下来, 而且 lines 在 method B里 被修改的内容都会被保持下来
+
+(5) 当整个 method A 都执行完毕后, 
+a.  lines 在 stack 的 reference 也会被 destroy 掉
+b.  尽管 lines 已经 out of scope, lines 的 reference 也被清理了。 
+    但是 lines 在 heap 的值还是会被保存一阵子, 然后 等待 garbage collection 跑起来的时候 去 postpone clean up (延迟清理它)
+
+
+4.  总结
+(1) stack 的 local variable 会被 destroy, 当它 out of scope, 
+(2) 尽管 object 是 out of scope, 而 object 就会处于 dereference state. 它就会等待 garbage collection 去清理它 (postpone clean up)
+(3) garbage collection 的清理object 的 条件就是 这个 object 没有 reference 了
+(4) garbage collection 都是 periodically (周期性) 执行在 background
+(5) 当有 'new' 关键词, 就会创建 一个 object in heap, 但是它的 reference 是在 stack  
+(6) (tech leader 解释) 出于性能的考虑, 当new 一个object 时, 会开辟一个 heap 内存, 当这个 object 没有 reference时
+    然后 garbage collection 不会立马关闭这个内存(又开一个给新的), 而且是根据需要, 移除 没有reference的 
+    重新分配 内存的给新的 reference.
