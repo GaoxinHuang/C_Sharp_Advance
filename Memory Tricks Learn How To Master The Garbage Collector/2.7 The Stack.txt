@@ -1,19 +1,20 @@
 一. 介绍
 1.  stack 储存什么
 (1) calling methods 
-(2) local variables
+(2) local variables, 比如 Object c 
+(3) 基本类的存储, 比如 int a = 1
 
 2.  stack call method 的流程
 (1) 会先创建一个 stack frame 去包含这个 method, 内容如下:
     a.  local variables
-    b.  return value 的 address
+    b.  return value
     c.  method parameters
 
 (2) 当这个 method 又call 另一个 method 时, 会创建第二个 stack frame 在 第一个的上面 (先进后出 - first in last out)
-    a.  同样会保存 return value 的 address, method parameters, local variables     
+    a.  同样会保存 return value, method parameters, local variables     
     b.  很快, 当被 call 的第二 method 跑完了, 这个第二个stack frame 里的所有内容就会被 removed, 特别是 第二个method 的 local variable 完全销毁
     注: (a) 如果 call 的method 的 parameter 是 基本类, 则 parameter也被 destroyed 掉 
-        (b) (个人猜测)如果return value/address 也会被 destroyed, 
+        (b) (个人猜测) return value 也会被 destroyed, 
             但是 当return 值都被赋值到 当前call 它的 method里, 则又被作为 local variable 在这个method里 
 
     c.  当 第一个method 跑完了, 你的第一个stack frame 就 remove. 你的所有local variables 都会被 destroyed 
@@ -27,7 +28,7 @@
 (1) 当 一个method call 另一个method, 后来被call的method 会在上面 - 先进后出 (first in last out) 的原则 - 详见 2.7 stack_memory.PNG
 (2) ！！！当一个method 执行完成后, 这个method 的 local variables 都会变成 go out of scope 而且都会被 destroyed (这里不是 garbage collection的机制,  garbage collection 只用于 heap)
 注: (a) 如果 call 的method 的 parameter 是 基本类, 则 parameter value也被 destroyed 掉 
-    (b) (个人猜测)如果return value/address 也会被 destroyed, 
+    (b) (个人猜测) return value 也会被 destroyed, 
         但是 当return 值都被赋值到 当前call 它的 method里, 则又被作为 local variable 在这个method里 
 
 (3) (不常见) Stack Overflow Exception - 原因 infinite sequence of method calls - 

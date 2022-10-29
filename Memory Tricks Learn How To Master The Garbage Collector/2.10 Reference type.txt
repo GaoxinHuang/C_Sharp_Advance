@@ -1,0 +1,29 @@
+1.  可参考 (2. 个人总结 - stack vs heap.txt)
+
+2.  总结内容
+(1) reference type 可以为null
+(3) reference type 之间的赋值 是 pointer/reference address/Memory address 的赋值
+(3) reference type 之间比较 是 pointer/reference 的比较
+(4) reference type 的 reference 的 pointer/reference 可以被存在 stack, 也可以被存在 heap(比如 object 底下还有 另外的object)
+    但是 value 必须存在 heap 上, 例子如下 - (详见 2. 个人总结 - stack vs heap.txt): 
+    public class X{
+        Y y;
+    }
+
+    Public class Y{
+        int i = 0;
+    }
+
+    public class Main{
+        public void Main(string args[]){
+            X x = new X();
+        }
+    }
+
+    (1) stack
+    a.  存 variable x 和 x 的 pointer/reference
+
+    (2) heap
+    a.  存 x 的值
+    b.  底下 object y 的 pointer, y 的值
+    c.  y 底下 int a = 0

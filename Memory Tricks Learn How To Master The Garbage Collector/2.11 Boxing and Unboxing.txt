@@ -11,7 +11,7 @@ public class MainClass{
 二. 解释代码
 1.  int a = 123; // stack 会存  int a = 123
 2.  object b = a; // boxing - 详见 2.11 Boxing.PNG
-注: (1) stack 存 int a = 123, object o 的 reference address
+注: (1) stack 存 int a = 123, object o 这个variable
     (2) heap 同样会存 123 的值, object o 的reference 也会指向 1234
     (3) 以上这个情况 就是 boxing
 

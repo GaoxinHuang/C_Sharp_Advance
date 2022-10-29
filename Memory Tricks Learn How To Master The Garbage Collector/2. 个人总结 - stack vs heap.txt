@@ -1,0 +1,36 @@
+1.  stack 存什么
+(1) variables (这个参数, 也可以理解成 参数名) - 比如 object o
+(2) 如果这个variable 是 reference type, 则保存 对应 heap 的 pointer/reference/Memory address/reference address
+(3) method 
+(4) value type 的 所有 - 比如 int a = 1
+
+2.  heap 存什么
+(1) Object value 以及整个这个object 底下所有 field 内容 (包括 reference address 和 value), 例子如下
+public class X{
+    Y y;
+}
+
+Public class Y{
+    int i = 0;
+}
+
+public class Main{
+    public void Main(string args[]){
+        X x = new X();
+    }
+}
+
+(1) stack
+a.  存 variable x 和 x 的 pointer/reference
+
+(2) heap
+a.  存 x 的值
+b.  底下 object y 的 pointer, y 的值
+c.  y 底下 int a = 0
+
+3.  基本版代码heap 和 stack 存储示例 - 详见 (2. 个人总结 - stack vs heap.png)
+
+4.  注:   
+    (1) java.lang.Object@155121 不是 pointer, 只是java 默认的toString() 要显示的, 所有有些地方说 这些也存在 heap 里
+        在 c#里 则直接显示它的 namespace/assembly + class name 
+
