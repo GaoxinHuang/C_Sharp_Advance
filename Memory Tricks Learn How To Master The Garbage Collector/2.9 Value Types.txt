@@ -1,0 +1,31 @@
+一. 概念
+1.  value type 的 type 值 和 reference 默认都会保存在 stack 里 - 详见 2.9 Value Type 1.PNG
+
+二. all value types 
+1.  常见的八大基本类 (也就是 Java 八大基本数据类型)
+(1) byte
+(2) char
+(3) short   (16位 整数)
+(4) int     (32位 整数)
+(5) long    (64位 整数)
+(6) bool
+(7) float   (32 小数)
+(8) double  (64 小数)
+
+2.  不常见的 value type
+(1) sbyte
+(2) unshort
+(3) unint
+(4) decimal
+(5) enum
+(6) struct
+
+3.  错误概念
+(1) 所有基本类都会保存在 stack 里 - 错误
+a.  原因:   当是 object instance 就会保存在 heap 里, 比如 Integer x = new Integer()
+以上这个情况, 则  stack 会有reference, 而 heap 也会有值
+
+4.  重要概念 & 总结
+(1) value type 可以存在 stack 和 heap (详见 3. 错误概念)
+(2) value type 赋值 都是 赋 value 值 (详见 2.9 Value Type 2.PNG )
+(3) value type 对比, 都是对比值
