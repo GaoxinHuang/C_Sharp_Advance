@@ -20,7 +20,8 @@ public class MainClass{
     }
 }
 
-3.  内存的流程展示 - 一个 method (称 method A) call 另一个method (称 method B) 带 object 参数时 
+3.  内存的流程展示- 一个 method (称 method A) call 另一个method (称 method B) 带 object 参数时 
+(0) 可见 2.8 Heap1.png & 2.8 Heap2.png
 (1) stack 部分还是原来样子: 两个 stack frame (新创一个 stack frame), 包含 local varibale, return address, parameter
 (2) 而 因为我们 new 了一个 object, 所以new 的 lines 将会存在 heap 里, 而且 heap 里 有个 line[] array, 里面有 2个值 line, 
     这两个 line 又会分别指向 heap里的 Line object (注: Line[] array 所有东西都在 heap)
