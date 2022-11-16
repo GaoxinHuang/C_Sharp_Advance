@@ -19,7 +19,7 @@ b.  而这些object 将会被 allocated(移除 heap) 而留下一个 hole 的空
 (2) 这可能会导致 long program freezes, 当在 collection 在跑动的时候
 (3) 重复 mark 同样的 live object 在每个 collection 是非常 inefficient
 
-2.  解决方案 - Generational Garbage Collector, 特性如下  
+2.  解决方案 - Generational Garbage Collector, 特性如下  - 3.14 Garbage Collection的Generation.PNG
 (1) 将最新的 object 定为 generation zero, 经过一次 collection cycle 就到了 generation 1, 再经过一次 collection cycle 就到了 generation 2 - 详见 Generational Garbage Collector.png
 (2) 而 Garbage Collection 对最新的 generation 0 访问最频繁, generation 1的一般频繁, generation 2 很不频繁 - 这样减少了 GC 的 访问次数
 (3) GC 会尽量地减少 Generation 0 的 object number, 所以就会大量减少 GC 的工作量
@@ -31,9 +31,9 @@ b.  而这些object 将会被 allocated(移除 heap) 而留下一个 hole 的空
 所以上面有两个 compaction 和 两次 moves (不算刚刚进入 Generation 0), 一共四次 Memory copy operations, 
 对于一个large live object, 非常 impact performance 
 
-2.  解决方案 - Small object and Large Object heaps 
+2.  解决方案 - Small object and Large Object heaps - 3.14 Garbage Collection的Generation.PNG
 (1) small object 拥有 Generation 0, 1, 2 这三个 Generations
-(2) Large object 将会有一个 Large Object Heap (属于 Generation 2 的阶段 - GC 会处理 Generation 2 和 Large Object heap 为同一阶段)
+(2) Large object 将会有一个 Large Object Heap (就是Generation 2 的阶段 - GC 会 collect Generation 2 和 Large Object heap 为同一阶段)
     - a.  Very infrequent collection
     - b.  No compaction - 只会 merge free memory blocks together, 但是不会做任何 compaction to optimize the total amount of free space.
 
