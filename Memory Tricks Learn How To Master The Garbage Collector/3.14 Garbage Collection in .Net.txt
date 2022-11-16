@@ -1,0 +1,56 @@
+一. garbafe collector 的 基本概率 
+1.  例子:   空间举例:
+(1) stack: array[]
+(2) heap: array[], [0] 指向 object 0, [1] 指向 object 1, [2] 指向 object 2, [3] 指向 object 3, [4] 指向 object 4, 
+
+2.  内存展示 - 详见 3.14 Garbage Collection的内存图.png
+
+3.  通常有几个 stages  (当 object 2 = null 和 object 3 = null): 
+(1) mark stage: 负责 mark 有 reference 的 live object, 而没有 reference 的object 将会被skip
+(2) sweep stage: 
+a.  所有没有被mark 的 object 将会被 dereference
+b.  而这些object 将会被 allocated(移除 heap) 而留下一个 hole 的空间在 heap (公司: 让新的object 先补上, 节约开启新的空间)
+
+(3) compact(压紧) stage ( .Net 会额外 多个 step) - 在这个step, 这些 hold 的空间在 heap 将会被 替代/挤压 - object 4 就会补上 object 2 和 object 3 的空位
+
+二. First Problem
+1.  问题如下:
+(1) Garbage collector 需要 mark 所有的 live 的 object 在 heap 里 在每个 collection 周期
+(2) 这可能会导致 long program freezes, 当在 collection 在跑动的时候
+(3) 重复 mark 同样的 live object 在每个 collection 是非常 inefficient
+
+2.  解决方案 - Generational Garbage Collector, 特性如下  
+(1) 将最新的 object 定为 generation zero, 经过一次 collection cycle 就到了 generation 1, 再经过一次 collection cycle 就到了 generation 2 - 详见 Generational Garbage Collector.png
+(2) 而 Garbage Collection 对最新的 generation 0 访问最频繁, generation 1的一般频繁, generation 2 很不频繁 - 这样减少了 GC 的 访问次数
+(3) GC 会尽量地减少 Generation 0 的 object number, 所以就会大量减少 GC 的工作量
+(4) long living objects 不会被checked very often
+
+三. Second Problem - 对于 large living object
+1.  问题如下 - 对于 large living object:
+当 large living object 进入 Generation 0 后, 被 compact, 移到 Generation 1, 接着再被 compact, 移到 Generation 2
+所以上面有两个 compaction 和 两次 moves (不算刚刚进入 Generation 0), 一共四次 Memory copy operations, 
+对于一个large live object, 非常 impact performance 
+
+2.  解决方案 - Small object and Large Object heaps 
+(1) small object 拥有 Generation 0, 1, 2 这三个 Generations
+(2) Large object 将会有一个 Large Object Heap (属于 Generation 2 的阶段 - GC 会处理 Generation 2 和 Large Object heap 为同一阶段)
+    - a.  Very infrequent collection
+    - b.  No compaction - 只会 merge free memory blocks together, 但是不会做任何 compaction to optimize the total amount of free space.
+
+3.  如何区分 small object 和 Large object
+(1) threshold 是 85 KB (85KB 也走 large object Heap)
+
+四. Implicit assumptions - .Net GC 的猜想
+1.  objects 都分为 short-lived or long-lived
+2.  short-lived object 将会被 allocated and discarded within a single collection cycle
+3.  Object survive two collection cycles are long-live
+4.  90% of all small objects are short-lived
+5.  All large objects (85k+) are long-lived
+6.  Do not go aginst(违背) these assumptions
+
+五. 总结重点：
+1.  GC 分三个steps: mark/sweep/compact 为一个 cycle
+2.  small object 被分到 small object heap, 并且有 3 generations
+3.  large object 被分到 large object heap, 并且只有一个 generation, 而且 not compact
+4.  .Net assume 90% of all small object are short-lived
+5.  .Net assume all large object are long-lived
