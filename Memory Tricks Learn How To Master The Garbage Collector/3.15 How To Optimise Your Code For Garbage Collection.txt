@@ -1,0 +1,119 @@
+一. Gen 0 optimizations 
+1.  如何优化的要领:
+(1) limit the number of objects you create
+(2) allocate, use, and discard object as qucikly as possible
+
+2. 例子
+(1) 例一:   string
+a. 坏代码
+StringBuilder s = new StringBuilder();
+for (int i=0; i< 10000; i++){
+    s.Append(i.ToString()+"KB");
+}
+b. 优化的代码
+StringBuilder s = new StringBuilder();
+for (int i=0; i< 10000; i++){
+    s.Append(i);
+    s.Append("KB");
+}
+原因: 
+(a) String is immutable: 所以 Xxx.ToString() 和 "KB" 会产生 两个object
+    所以会省下 40000 string object (虽然不知道这个数字为什么, 跟 for loop有关)
+
+(2) 例二 - boxing & unboxing
+a.  坏代码
+ArrayList list = new ArrayList();
+for (int i=0; i< 10000; i++){
+    list.Add(i);
+}
+
+b.  优化代码
+List<int> list = new List<int>();
+for (int i=0; i< 10000; i++){
+    list.Add(i);
+}
+原因:   通过减少 boxing 和 unboxing，省下 20 000 的 box integer object
+
+(3) 例三
+a.  坏代码
+public static MyObject obj = new MyObject();
+// lots of other code
+UseTheObject(obj);
+
+b.  优化代码
+// lots of other code
+public static MyObject obj = new MyObject();
+UseTheObject(obj);
+obj = null; 
+原因:   尽量靠近使用的地方申明 obj, 不然容易让object 进入 gen 1 或者 gen 2. 而且快点把它变成 null 也帮助 GC 快点清理它
+
+二. lifetime optimizations & size optimizations
+1.  要领 - Garbage collector assumes 90% of all small objects are short-live, and large objects are long-live, 具体如下
+(1) Avoid large short-live objects
+(2) Avoid small long-lived objects
+(3) Large object 应该是 re-use objects 
+(4) reallocate/dispose after use refactor code
+(5) short-live 如果object 太大, 应该去 split object 或者 reduce 内存的size/footprint 来达到 小于85k
+(6) long-live 应该去 merge objects 去变成大的object
+
+2.  例:
+(1) 例1 - 要领(3):
+a.  坏代码
+ArrayList list = new ArrayList(85190);
+UseTheList(list); 
+
+b.  优化代码
+ArrayList list = new ArrayList(85190);
+UseTheList(list);
+...
+list.Clear();
+UseTheList(list);
+原因:   尽量用 这个 large object 重新利用起来, 而且不是再去开一个新的 large object
+
+(2) 例2 - 要领(4)
+a.  坏代码
+ArrayList list = new ArrayList(85190);
+for(int i=0; i<10000; i++){
+    list.Add(new Pair(i, i+1));
+}
+b.  优化代码
+int[] list_1 = new int[85190];
+int[] list_2 = new int[85190];
+for(int i=0; i<10000; i++){
+    list_1.Add(i);
+    list_2.Add(i+1);
+}
+原因:   用 int 去代替 dictionary 的形式的object, 可以节约 heap 的空间
+
+(3) 例3 - 要领(5)
+a.  坏代码
+int[] buffer = new int[32768];
+for(int i=0; i<10000; i++){
+    buffer[i] = GetByte(i);
+}
+b.  优化代码
+byte[] buffer = new byte[32768];
+for(int i=0; i<10000; i++){
+    buffer[i] = GetByte(i);
+}
+原因: integer 是 4 倍的 byte, 所用 byte 减少 footprint 的空间
+
+(4) 例4 - 要领(6)
+a.  坏代码
+public static ArrayList list = new ArrayList();
+// lots of other code
+UseTheObject(obj);
+
+b.  优化代码
+public static ArrayList list = new ArrayList(85190);
+// lots of other code
+UseTheObject(obj);
+原因: 直接定义size, 能告诉 GC 是大的object
+
+三. 总结如何优化代码在Garbage Collector
+(1) limit the number of objects you create
+(2) allocate, use, and discard object as qucikly as possible
+(3) Re-use large object
+(4) Use only small short-lived, and large long-lived objects
+(5) Increase lifetime or decrease size of large short-lived objects
+(6) Decrease lifetime or increase size of small long-lived objects
