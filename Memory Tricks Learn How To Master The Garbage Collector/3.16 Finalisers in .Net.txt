@@ -1,0 +1,45 @@
+一. 概念
+1.  什么是 Finalisers - 是一个 class method, 当在object 将要被  garbage collector 清理之前, 就会调用它, 与构造器相反
+2.  代码如下:
+public class MyObj{
+    public MyObj(){
+        // 构造器
+    }
+    ~MyObj(){
+        // 这个就是 Finalisers
+    }
+}
+
+3.  常用场景
+(1) 文件的读取 - 因为会有限制什么的 
+
+二.  总结
+1.  重点和注意点
+(1) a finalisers must only process its own object and never other reference objects
+(2) 你不应该去猜测 Finalisation order 会不会影响你的代码出 crash, 因为 微软或者 package的创建者已经帮你考虑好了
+(3) 你永远不会在 Finaliser 的地方去写其他的 referenced object, 因为它也有可能已经被 Finalized
+(4) 你永远不应该添加 finalisers 到 the root of an object graph (比如 最上面的object), 而是只是 添加到 the edge (比如 object 底下的属性值)
+(5) 根据 特性(3), Finaliser 不能保证一定被调用, 如果 host process exits, 4秒后, 任何 剩下在 Finalisation queue 都会被清除 
+(6) Finaliser 是被随机 called 
+(7) Finaliser 通常是在 generation 1 被调用, object 就被清理了, 有时也在 generation 2
+(8) Finaliser 应该是 非常短暂的代码, 让它快速跑完
+
+2.  特性
+(1) Finalisation 是一个 queue, 就是 object 要被清理之前的, 有个queue 去调用 每个object的 Finalisation的方法
+(2) Finalisation 其实是一个随机的机制
+(3) 当 application is exit, .Net 只给 application 剩下 4秒去处理, 所有的剩余 Finalisation queue, 
+    所以可能无法执行到所有object 的  Finalisers. 4 秒过后, 所有的 object 都会被释放
+
+三. 代码例
+1.  Finalisation order - 重点(2)
+(1) 代码
+FileStream fs = new FileStream("1.txt", FileAccess.ReadWrite);
+StreamWriter sw = new StreamWriter(fs);
+sw.WriteLine("Hello");
+
+(2) 思考
+    如果 FileStream 先  Finaliser, 则 StreamWriter 就要写入 close 的file, 就会crash. 
+    反之, StreamWriter 先 Finalize, 就会没事
+    所以理论以上代码就会有50% 概率 crash, 完全取决于谁先 Finalize
+    但是 微软考虑到这个问题, 所以他们没有开发 Finalize 给 StreamWriter. 
+    所以 如果你忘了关 StreamWriter 或者 没有flush, 你的data 就不会被写入 disk
