@@ -1,0 +1,25 @@
+一. boxing 和 unboxing 回顾 - 详见 2.11
+1.  概念
+(1) boxing:  
+int a = 123;
+object b = a;
+
+(2) unboxing:
+int c = (int) b;
+
+2.  坏处:   stack 和 heap 都会占内存空间
+
+二. 实验 
+1.  步骤:   
+(1) 用指令跑 mono --profile=log:report Xxx.exe
+(2) 1,000,000 循环
+
+2.  实验结果
+(1) 没有任何转化: 3496 bytes in 33 objects
+(2) boxing/unboxing: 24003496 bytes in 1000033 objects
+
+三. 总结
+1.  用处: boxing/unboxing: let you switch between value type and reference type
+2.  导致问题:   each boxing will create one new object on the heap. A boxed object occupies more memory than the original value type
+a.  boxing floods the heap with lots of small objects and puts considerable pressure on the GC
+b.  Boxing and unboxing should be avoided wherever possible
