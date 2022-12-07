@@ -20,25 +20,28 @@ class WithoutDispose{
     }
 }
 
-2.  dispose 的例子
-
+2.  dispose 的例子 (纯教程的 dispose pattern)
 class WithDispose: IDisposable{
-    private Stopwatch watch = null;
     private bool disposed = false;  // 保证 GC.SuppressFinalize(this); 只会被调用一次 
-    public WithoutDispose(){
-        watch = new Stopwatch();
-        watch.Start();
-    }
     public void Dispose(){
-        if(!disposed){  // 保证 GC.SuppressFinalize(this); 只会被调用一次 
-            GC.SuppressFinalize(this); // 让GC强制回收这个
-        }
-        disposed = true;
+        Dispose(true); // 我们自定义的代码, 比如释放资源
+        GC.SuppressFinalize(this); // 让GC强制回收这个
     }
 
-    ~WithoutDispose(){ // 半天才被调用
-        watch.Stop()
-        Console.WriteLine(watch.ElapsedMillseconds); 
+    protected virtual void Dispose(bool disposing){
+        if(!disposed){ // 保证这块只被调用一次 
+            if(disposing){ // 这块是当调用 Dispose 时, 我们自定义的代码, 比如释放资源
+                // explicitly called from user code
+                // you can do basically anything here
+            }else{ // else 这块是 当调用 finaliser 时, 想写的代码
+                // called from finaliser
+                // do not access references, run quickly
+            }
+        }
+        dispose = true;
+    }
+    ~WithoutDispose(){ 
+       Dispose(false); 
     }
 }
 
