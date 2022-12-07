@@ -1,0 +1,49 @@
+一. 概念
+1.  为什么会有 dispose
+背景:   Object with resource 自己的生命周期: Construct object -> Use Object -> Finalise object, release resource (当GC 要clean up)
+问题:   Finalise object 可能会等非常久才被GC调用, resource 才会被清理, 所以 resource 就算不用的也要等很久才会被 release
+
+解决方案:   dispose 去
+
+
+二. 代码例子
+1.  没有 dispose 代码例子:
+class WithoutDispose{
+    private Stopwatch watch = null;
+    public WithoutDispose(){
+        watch = new Stopwatch();
+        watch.Start();
+    }
+    ~WithoutDispose(){ // 半天才被调用
+        watch.Stop()
+        Console.WriteLine(watch.ElapsedMillseconds); 
+    }
+}
+
+2.  dispose 的例子
+
+class WithDispose: IDisposable{
+    private Stopwatch watch = null;
+    private bool disposed = false;  // 保证 GC.SuppressFinalize(this); 只会被调用一次 
+    public WithoutDispose(){
+        watch = new Stopwatch();
+        watch.Start();
+    }
+    public void Dispose(){
+        if(!disposed){  // 保证 GC.SuppressFinalize(this); 只会被调用一次 
+            GC.SuppressFinalize(this); // 让GC强制回收这个
+        }
+        disposed = true;
+    }
+
+    ~WithoutDispose(){ // 半天才被调用
+        watch.Stop()
+        Console.WriteLine(watch.ElapsedMillseconds); 
+    }
+}
+
+三. 总结
+1.  Dispose pattern provides a method for explicitly releasing resources
+2.  using statement will automatically call the dispose method at the end of the using block
+3.  Dispose pattern dramtically reduces the time that resources are held by objects
+4.  calling the dispose method suppresses like finaliser, which prevents the object's lifetime extending into gen 1
