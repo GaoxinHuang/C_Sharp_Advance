@@ -1,0 +1,45 @@
+一.  代码例 - why not join string together
+1.  问题代码
+string result = string.Empty;
+for(int = 0; i< 10000; i++){
+    result += "#";
+}
+
+2.  性能结论:   
+(1) total: 10034 objects - 100303528 bytes
+(2) string: 10020  object - 100301416 bytes
+(3) string concat 方法 (string 底层的 + ): 被call 10000, 运行 236 ms
+    concat 方法 -> string的 InternalAllocateStr - 9999, 168 ms
+    -> CharCopy 方法 (19998) -> string memcpy4 -> string memcpy 2 
+
+3.  原因:   因为 string 是个 immutable objects 在 .Net, 所以string 不会被 modify. 
+            当他被 modify 时, 他只会被 copy, 然后拼接这个copy组成一个新的string object. 
+    注: (1) 这里包括了 contact, replace 等方法
+        (2) string 是属于 object, 属于存于 heap memory 
+
+二. 解决方案 - StringBuilder (面对 大量的 string 的操作(contact/modify/replace))
+1.  解决方案
+StringBuilder result = new StringBuilder();
+for(int = 0; i< 10000; i++){
+    result.Append("#");
+}
+
+2.  性能结论:   
+(1) total: 46 objects - 69400 bytes
+(2) string: 31  object - 67240 bytes
+
+3.  原理:
+(1) 把 string 作为一个 character buffer 在 memory 
+(2) 当你添加 string 时, 其实是往这个 character buffer 添加 character (或者 character 集合, 其实就是 string)
+(3) 这里没有 copy object
+
+4.  扩张
+(1) 代码:
+也可以把开头 StringBuilder result = new StringBuilder(10000); - 就也提升一点性能 
+(2) 性能结论:   
+a.  total: 37 objects - 23640 bytes
+b.  string: 22  object - 21480 bytes
+
+(3) 原理:
+a.  参数为 int - 就是 StringBuilder capacity
+b.  这样就可以告诉 memory 确定的 exact required amout of memory, 就不需要 double in side (不知道怎么算成两倍的)
