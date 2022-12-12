@@ -1,0 +1,73 @@
+一. struct vs class
+1.  struct is value type, class are reference types
+2.  Assigning structs copies the value of all internal fields 
+    class 则是也是copy over all fields, 但是最后你有两个 reference in same object in heap. 
+3.  structs can implement interfaces but cannot inherit
+4.  structs cannot have instance field initialisers -  所有的 internal field 不能初始化, 只有 default value,只能 override
+5.  Structs cannot have a parameterless constructor - 原因是: 当 runtime时, 初始化 struct时, 会清空它的 memory
+    class 会 call default parameterless constructor
+6.  Structs cannot have finalisers - 因为它是 value, GC 不会管它
+
+二. 代码例
+0.  List.Add(new PointClass(i, i)) - 10 000 遍
+1.  class
+(1) 代码部分
+public class PointClass{
+    public int X;
+    public int Y;
+    public PointClass(int x, int y){ 
+        X= x;
+        Y= y; 
+    }
+} 
+
+(2) 性能结果 - 详见 4.22 Struct_Class的内存计算图
+a.  point class: 240000 bytes in 10 000 objects
+b.  List:       80032 bytes in 1 object - 原因: an object reference on 64 system is 8 bytes in size
+c.  total:   323616 bytes in 10 035 objects
+
+2.  struct
+(1) 代码部分
+public struct PointStruct{
+    public int X;
+    public int Y;
+    public PointStruct(int x, int y){
+        X=x;
+        Y=y;
+    }
+}
+
+(2) 性能结果 - 详见 4.22 Struct_Struct的内存计算图.PNG
+a.  List:       80032 bytes in 1 object, 还是有 PointStruct 的 size (每个 8 bytes - 详见下面 - 计算总结分析)
+b.  total:   83616 bytes in 35 objects
+c.  没有 struct 部分, 因为 struct 是 value type, 所以没有在 heap里, 就不会给 GC 带来压力
+
+3.  计算总结分析
+(1) Point Class 是 
+a.  每个class 占 heap - overhead(16 bytes) + X (4 bytes) + Y(4 bytes) = 24 bytes
+b.  List 的 reference 8 bytes 
+c.  所以总的下来, 每个 class 要占 heap 8+ 24 = 32 bytes
+
+(2) Point Struct 是
+a.  每个Struct 占 heap - X (4 bytes) + Y(4 bytes) = 24 bytes
+b.  heap 只要记录 struct 的值即可 就是 8 bytes
+c.  所以总的下来, 每个 Struct 要占 heap 8 bytes
+d.  而且它不算是 reference type, 所以 GC 不会去管它, 它就会直接随着 List 就被清理
+
+三. 什么时候用 struct
+1.  use struct when data are storing represents a single value (比如 point, vector, matrix, complex number, a numeric tuple)
+2.  use struct if data size is very small (24 bytes or less) and you are going to create thousands or millions of instances
+3.  use struct if data are immutable
+4.  use structs if date will not have to boxed frequently
+(此外, 都是用 class)
+
+四. 总结
+1.  struct is value type, class are reference types
+2.  struct are much faster than class because 
+    a.  they donot have a default constructor, cannot 
+    b.  cannot be inherit
+    c.  are not collected by GC
+
+3.  Struct only allocate heap memory for their internal fields and do not have the 16 bytes overhead that class have
+4.  Instead of class can dramatically reduce the memory footprint and runtime of your code
+ 
