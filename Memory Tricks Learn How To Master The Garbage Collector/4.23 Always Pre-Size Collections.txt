@@ -1,0 +1,41 @@
+一. 例：
+1.  StringBuilder: 它初始值会有 very tiny amount of character memory for buffer, 
+            当 buffer run out of space. 它就会 allocate a new buffer of double size and copies everything over into the new buffer 
+
+2.  还有更多集合的例子
+(1) ArrayList<int> arrayList = new ArrayList<int>();
+a.  默认的 default collection capacity: Raw View -> Non-public member -> _items  = 4
+
+(2) Queue<int> queue = new Queue<int>();
+a.  默认的 default collection capacity: Raw View -> Non-public member -> _array  = 4
+
+(3) Stack<int> stack = new Stack<int>();
+a.  默认的 default collection capacity: Raw View -> Non-public member -> _array  = 16
+
+(4) List<int> list = new List<int>();
+a.  默认的 default collection capacity: Raw View -> Non-public member -> _items  = 4
+
+(5) Dicionary<int, int> dicionary = new Dicionary<int, int>();
+a.  默认的 default collection capacity: Raw View -> KeySlots = 12
+
+3.  分析
+(1) 如果你初始化一个collection 没有带size, 然后你 add 很多 items, 它会resize 很多次
+
+4.  没有初始化的性能分析  
+(1) 期待 memory 计算 
+a.  背景: 一个 List =  Item size: 4 bytes， 我们添加 262145 items
+b.  total memory = 4 * 262145 bytes = 1MB
+
+(2) 实际上 - 4MB
+
+(3) 原因:   
+a.  List 假象: The list needs to grow to 2 MB to fit all items 
+b.  consecutive doubling adds up to 4 MB (because it's already cycled through all preceding powers of 2, the total allocated heat memory)
+c.  最终 worst case scenario 就变成 4 * larger than needed
+
+(4)  性能优化后 - 1MB (10)
+
+二. 总结
+1.  All collections in .Net are initialized to a tiny default capacity and automatically double their size when they are full
+2.  This behaviour can result in a worst-case memory footprint that is 4 * larger than necessary 
+3.  To avoid this problem you must initialise the collection to the correct size
