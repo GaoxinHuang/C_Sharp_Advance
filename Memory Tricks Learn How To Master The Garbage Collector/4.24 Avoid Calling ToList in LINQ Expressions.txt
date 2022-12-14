@@ -2,3 +2,50 @@
 1.  工作原理：
 (1) IEnumerable 有 GetEnumerator() -> returns enumerator (继承 IEnumerator: Current, MoveNext(), Reset())
 (2) foreach 就是 基于  enumerator
+
+2.  代码例子和解析 - Enumerable 是还没有执行的, 所以不占内存(只占当前 current 和 计算下个item 的 expression)
+(1) 代码例
+var numbers = Enumerable.Range(1,1000).Where(n=>n%2!=0);
+
+(2) 解析代码
+a.  This expression creates a filterd enumerator for a range of 500 odd numbers,
+    but it does not actually generate the numbers yet
+
+b.  The range does not occupy any memory, The enumerator only track the current number 
+    and it has a filter expression for calculating the next number in the range
+
+c.  total memory footprint of the enumerator is only the size of a single item 
+
+二. 实战代码
+1.  错误代码部分
+private static IEnumerable<string> dictionary = null;
+private static void SpellCheck(){
+    var result = from word in story let lowerCase = word.ToLower()
+        select new {Word = word, Ok = dictionary.ToList().Contains(lowerCase)};  // 注: dictionary 在前面已经定义值了
+    foreach (var r in result){....}
+}
+
+2.  性能结果
+(1) String[]: 79703944 bytes for 349 objects
+(2) String: 129569072 bytes for 2753869 objects
+(3) total: 209595152 bytes (200MB) for 2754936 objects
+
+3.  性能分析
+(1) 背景设了 18 words 在 story里, 所以这边 dictionary 就会被用到 18 次
+(2) 这样 dictionary.ToList 就 reload 了 18次 在 memory 18 times - 其实就是 String[].
+
+4.  解决方案 - 在 LINQ 的外面就做好 ToList的工作
+(1) 解决方案:
+private static List<string> dictionary = new List<string>(150000);
+...
+(2) 解释:   在 LINQ 的外面就做好 dictionary.ToList()的 值(这样也直接设成 List dictionary), 这样就不用在LINQ 里去重复调用 ToList
+
+(3) 性能结果
+(1) String[]: 6834992 bytes for 145291 objects
+(2) String: 1200600 bytes for 9 objects
+(3) total: 8124712 bytes (8MB)  for 145819 objects
+
+三. 总结:
+1.  LINQ is a powerful framwork for running queries on enumerable data
+(1) Calling the ToList method in LINQ expression can unexpectedly inflate the memory footprint of your code
+(2) To fix this problem, call ToList before running the LINQ query
