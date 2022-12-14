@@ -1,0 +1,4 @@
+一. 概念
+1.  工作原理：
+(1) IEnumerable 有 GetEnumerator() -> returns enumerator (继承 IEnumerator: Current, MoveNext(), Reset())
+(2) foreach 就是 基于  enumerator
